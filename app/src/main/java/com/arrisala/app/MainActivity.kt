@@ -61,7 +61,7 @@ fun RisalaApp() {
                             HadithCard("Hadith 2 — Good character", "The best among you are those who have the best character.", "Mbora wenu ni yule mwenye tabia njema zaidi.", "Sahih al-Bukhari 3559; Sahih Muslim 2321")
                         }
                         "Learn Islam" -> InfoCard("Learn Islam", "Explore the foundations of faith, prayer, good character, the life of Prophet Muhammad (peace be upon him), and everyday Islamic manners. Content will be expanded with references.")
-                        "About" -> InfoCard("About AR-RISALA", "AR-RISALA is an Islamic learning app created to make Quran guidance, Hadith and Islamic knowledge easier to explore. Knowledge • Faith • Guidance.")
+                        "About" -> InfoCard("About AR-RISALA", "AR-RISALA is an Islamic learning app created to make Quran guidance, Hadith and Islamic knowledge easier to explore.\\n\\nOwner & Creator: Abdirahman Jarso\\nKnowledge • Faith • Guidance.")
                         else -> InfoCard("Begin your journey", "Choose Quran, Hadith or Learn Islam above. May Allah grant us beneficial knowledge.")
                     }
                     Text("May Allah bless your search for beneficial knowledge.", color = DeepGreen, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(top = 10.dp))

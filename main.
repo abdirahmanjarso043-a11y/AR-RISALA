@@ -1,0 +1,29 @@
+:
+print("BISMILLAH")
+print("========================")
+print("WELCOME TO AR-RISALA")
+print("1. Learn Quran")
+print("2. Learn Hadith")
+print("3. Learn Islam")
+print("4. About AR-RISALA")
+choice = input("Choose an option: ")
+if choice == "1":
+    print("WELCOME TO THE HOLY QURAN")
+print("Learn the words of Allah.")
+
+elif choice == "2":
+    print("WELCOME TO HADITH")
+    print("Learn the teachings of Prophet Muhammad (PBUH).")
+
+elif choice == "3":
+    print("WELCOME TO ISLAM")
+    print("Learn about your beautiful religion.")
+
+elif choice == "4":
+    print("AR-RISALA")
+    print("Knowledge, Faith and Guidance.")
+
+else:
+    print("Invalid choice. Please try again.")
+
+print("JAZAKALLAH KHAIR!")

@@ -42,11 +42,15 @@ if(tab==='about')c.innerHTML='<section class="panel"><h2>About AR-RISALA</h2><p>
 }
 const quranText={1:{name:"Al-Fatihah",verses:[["بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ","In the name of Allah, the Most Compassionate, the Most Merciful."],["الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ","All praise is for Allah—Lord of all worlds."],["الرَّحْمَٰنِ الرَّحِيمِ","The Most Compassionate, the Most Merciful."],["مَالِكِ يَوْمِ الدِّينِ","Master of the Day of Judgment."],["إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ","You alone we worship and You alone we ask for help."],["اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ","Guide us along the Straight Path."],["صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ","The Path of those You have blessed—not those You are displeased with, or those who are astray."]]},112:{name:"Al-Ikhlas",verses:[["قُلْ هُوَ اللَّهُ أَحَدٌ","Say, ˹O Prophet,˺ “He is Allah—One ˹and Indivisible˺.”"],["اللَّهُ الصَّمَدُ","Allah—the Sustainer ˹needed by all˺."],["لَمْ يَلِدْ وَلَمْ يُولَدْ","He has never had offspring, nor was He born."],["وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ","And there is none comparable to Him."]]}};
 const surahCache={};
+function readOffline(key){try{return JSON.parse(localStorage.getItem('ar_risala_'+key)||'null')}catch(e){return null}}
+function writeOffline(key,value){try{localStorage.setItem('ar_risala_'+key,JSON.stringify(value));return true}catch(e){return false}}
 async function openSurah(n){
  const d=document.getElementById('surah-detail');
  d.innerHTML='<div class="item"><h3>Surah '+n+': '+surahs[n-1]+'</h3><p>Loading verified Qur’an text and English translation…</p></div>';
  d.scrollIntoView({behavior:"smooth",block:"start"});
  if(surahCache[n]){renderSurah(n,surahCache[n]);return;}
+ const savedSurah=readOffline('surah_'+n);
+ if(savedSurah){surahCache[n]=savedSurah;renderSurah(n,savedSurah);return;}
  try{
   const response=await fetch('https://api.alquran.cloud/v1/surah/'+n+'/editions/quran-uthmani,en.sahih');
   if(!response.ok)throw new Error('Network response was not successful');
@@ -55,6 +59,7 @@ async function openSurah(n){
   const arabic=payload.data[0].ayahs,english=payload.data[1].ayahs;
   const verses=arabic.map((a,i)=>[a.text,english[i]?english[i].text:'']);
   surahCache[n]={name:payload.data[0].englishName||surahs[n-1],verses};
+  writeOffline('surah_'+n,surahCache[n]);
   renderSurah(n,surahCache[n]);
  }catch(error){
   const local=quranText[n];
@@ -72,6 +77,9 @@ async function loadHadith(){
  const number=Number(document.getElementById('hadith-number').value);
  const box=document.getElementById('hadith-detail');
  if(!Number.isInteger(number)||number<1){box.innerHTML='<p>Please enter a valid Hadith number.</p>';return;}
+ const offlineKey='hadith_'+book+'_'+number;
+ const savedHadith=readOffline(offlineKey);
+ if(savedHadith){box.innerHTML=savedHadith+'<p class="muted">Saved on this device • Offline copy</p>';return;}
  box.innerHTML='<p>Loading Hadith…</p>';
  try{
   const res=await fetch('https://sahih-al-bukhari.com/api/v1/hadith/'+book+'/'+number);
@@ -81,6 +89,7 @@ async function loadHadith(){
   const grade=h.grade&&h.grade.label?h.grade.label:'Not supplied';
   const chapter=h.chapter&&h.chapter.title?h.chapter.title:'Chapter not supplied';
   box.innerHTML='<h3>'+h.reference+'</h3><p class="muted">'+chapter+'</p><div class="arabic">'+h.arabic+'</div><p><strong>Grade:</strong> '+grade+(h.grade&&h.grade.grader?' — '+h.grade.grader:'')+'</p><p class="muted">Source edition: '+(h.source&&h.source.edition?h.source.edition:'not supplied')+'</p><p><a href="'+h.canonical+'" target="_blank" rel="noopener">Open source record</a></p>';
+  try{localStorage.setItem('ar_risala_'+offlineKey,JSON.stringify(box.innerHTML));}catch(e){}
  }catch(e){box.innerHTML='<p>That number could not be loaded. Check the number or choose another collection.</p><button class="back" onclick="loadHadith()">Try again</button>';}
 }
 function filterList(q,id){document.querySelectorAll('#'+id+' .item').forEach(el=>el.style.display=el.textContent.toLowerCase().includes(q.toLowerCase())?'':'none')}

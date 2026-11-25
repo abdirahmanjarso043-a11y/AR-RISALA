@@ -198,6 +198,21 @@ if(tab==='about')c.innerHTML='<section class="panel"><h2>About AR-RISALA</h2><p>
 const quranText={1:{name:"Al-Fatihah",verses:[["بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ","In the name of Allah, the Most Compassionate, the Most Merciful."],["الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ","All praise is for Allah—Lord of all worlds."],["الرَّحْمَٰنِ الرَّحِيمِ","The Most Compassionate, the Most Merciful."],["مَالِكِ يَوْمِ الدِّينِ","Master of the Day of Judgment."],["إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ","You alone we worship and You alone we ask for help."],["اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ","Guide us along the Straight Path."],["صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ","The Path of those You have blessed—not those You are displeased with, or those who are astray."]]},112:{name:"Al-Ikhlas",verses:[["قُلْ هُوَ اللَّهُ أَحَدٌ","Say, ˹O Prophet,˺ “He is Allah—One ˹and Indivisible˺.”"],["اللَّهُ الصَّمَدُ","Allah—the Sustainer ˹needed by all˺."],["لَمْ يَلِدْ وَلَمْ يُولَدْ","He has never had offspring, nor was He born."],["وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ","And there is none comparable to Him."]]}};
 const surahCache={};
 let quranDbPromise;
+function validSurahData(data){
+ return !!data&&typeof data.name==='string'&&Array.isArray(data.verses)&&data.verses.length>0&&data.verses.every(v=>Array.isArray(v)&&typeof v[0]==='string'&&v[0].trim().length>0&&typeof v[1]==='string'&&v[1].trim().length>0);
+}
+function parseQuranPayload(payload,n){
+ if(!payload||payload.code!==200||!Array.isArray(payload.data)||payload.data.length<2)throw new Error('The Qur’an source returned incomplete data for Surah '+n+'.');
+ const arabic=payload.data[0],english=payload.data[1];
+ const count=Number(arabic.numberOfAyahs);
+ if(!Number.isInteger(count)||count<1||Number(english.numberOfAyahs)!==count||!Array.isArray(arabic.ayahs)||!Array.isArray(english.ayahs)||arabic.ayahs.length!==count||english.ayahs.length!==count)throw new Error('Verse-count verification failed for Surah '+n+'. No incomplete copy was saved.');
+ const verses=arabic.ayahs.map((a,i)=>{
+  const ar=a&&a.text,en=english.ayahs[i]&&english.ayahs[i].text;
+  if(typeof ar!=='string'||!ar.trim()||typeof en!=='string'||!en.trim())throw new Error('A verse is missing from Surah '+n+'. No incomplete copy was saved.');
+  return [ar,en];
+ });
+ return {name:arabic.englishName||surahs[n-1],verses};
+}
 function quranDB(){
  if(quranDbPromise)return quranDbPromise;
  quranDbPromise=new Promise((resolve,reject)=>{
@@ -223,13 +238,12 @@ async function downloadAllQuran(){
   const db=await quranDB();let completed=0;
   for(let n=1;n<=114;n++){
    const cached=await getCachedSurah(n);
-   if(cached&&Array.isArray(cached.verses)&&cached.verses.length){completed++;if(status)status.textContent='Offline Qur’an: '+completed+' / 114 Surahs ready.';continue;}
+   if(validSurahData(cached)){completed++;if(status)status.textContent='Offline Qur’an: '+completed+' / 114 Surahs ready.';continue;}
    if(status)status.textContent='Downloading Surah '+n+' of 114: '+surahs[n-1]+'…';
    const response=await fetch('https://api.alquran.cloud/v1/surah/'+n+'/editions/quran-uthmani,en.sahih');
    if(!response.ok)throw new Error('Network error while downloading Surah '+n+'. Your saved Surahs are safe; tap resume when online.');
    const payload=await response.json();
-   if(payload.code!==200||!payload.data||payload.data.length<2||!Array.isArray(payload.data[0].ayahs)||!Array.isArray(payload.data[1].ayahs)||payload.data[0].ayahs.length!==payload.data[1].ayahs.length||!payload.data[0].ayahs.length)throw new Error('The source returned incomplete data for Surah '+n+'. Saved Surahs are safe; tap resume to continue.');
-   const data={name:payload.data[0].englishName||surahs[n-1],verses:payload.data[0].ayahs.map((a,i)=>[a.text,payload.data[1].ayahs[i].text||''])};
+   const data=parseQuranPayload(payload,n);
    await saveCachedSurah(n,data);surahCache[n]=data;completed++;
    if(status)status.textContent='Offline Qur’an: '+completed+' / 114 Surahs ready.';
    await new Promise(resolve=>setTimeout(resolve,180));
@@ -251,10 +265,8 @@ async function openSurah(n){
   const response=await fetch('https://api.alquran.cloud/v1/surah/'+n+'/editions/quran-uthmani,en.sahih');
   if(!response.ok)throw new Error('Network response was not successful');
   const payload=await response.json();
-  if(payload.code!==200||!payload.data||payload.data.length<2)throw new Error('Qur’an data unavailable');
-  const arabic=payload.data[0].ayahs,english=payload.data[1].ayahs;
-  const verses=arabic.map((a,i)=>[a.text,english[i]?english[i].text:'']);
-  surahCache[n]={name:payload.data[0].englishName||surahs[n-1],verses};
+  const data=parseQuranPayload(payload,n);
+  surahCache[n]=data;
   await saveCachedSurah(n,surahCache[n]);
   renderSurah(n,surahCache[n]);
  }catch(error){

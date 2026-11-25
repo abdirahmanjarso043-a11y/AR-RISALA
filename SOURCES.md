@@ -20,10 +20,10 @@
 
 ## Sahaba biographies
 
-- The app currently includes fifty starter biographies (the original ten expanded entries plus thirty additional summaries) with brief source notes. They are an initial batch, not a substitute for the planned 150 fully researched and reviewed biographies.
+- The app currently includes fifty starter biographies (fifty short summaries in the current starter set) with brief source notes. They are an initial batch, not a substitute for the planned 150 fully researched and reviewed biographies.
 - Further reading link in the app: [Sahibukum — 140 Companion biographies](https://sahibukum.com/companions/). This is an independent resource; AR-RISALA does not claim authorship of its content.
 - Bibliographical orientation: [Revive Sahaba — classical source books](https://revivesahaba.com/sources/), including works such as Ibn Sa'd's *Kitab al-Tabaqat al-Kabir*, Ibn Abd al-Barr's *al-Isti'ab*, Ibn al-Athir's *Usd al-Ghabah* and Ibn Hajar's *al-Isabah*.
-- The remaining 110 in-app biographies still need to be written, individually sourced and reviewed. Source notes point readers toward classical works; they are not line-by-line citations for every sentence. Do not copy third-party prose without permission.
+- The remaining 100 in-app biographies still need to be written, individually sourced and reviewed. Source notes point readers toward classical works; they are not line-by-line citations for every sentence. Do not copy third-party prose without permission.
 
 ## Editorial rule
 

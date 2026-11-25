@@ -321,12 +321,13 @@ async function buildHadithLibrary(){
     if(response.status===404){p[book.id].next=number+1;saveHadithProgress(p);await updateHadithProgress();await waitHadith(1050);continue;}
     if(!response.ok){if(response.status>=500){await waitHadith(5000);continue;}throw new Error('Source returned HTTP '+response.status+'. Saved progress is safe.');}
     let h;try{h=await response.json();}catch(e){throw new Error('The source returned unreadable data. Saved progress is safe.');}
-    const licence=String(h?.licence?.arabic_text?.name||'').trim();
+    const licenceName=String(h?.licence?.arabic_text?.name||'').trim();
+    const isUnlicense=/^(?:the\\s+)?unlicense(?:\\s*\\(public-domain dedication\\))?$/i.test(licenceName);
     const canonical=String(h?.canonical||'');
-    if(!h?.arabic||typeof h.arabic!=='string'||!h.reference||!/^https:\/\//i.test(canonical)||licence.toLowerCase()!=='unlicense'){
+    if(!h?.arabic||typeof h.arabic!=='string'||!h.reference||!/^https:\/\//i.test(canonical)||!isUnlicense){
       p[book.id].next=number+1;saveHadithProgress(p);await waitHadith(1050);continue;
     }
-    const record={id:book.id+':'+number,book:book.id,collection:book.name,number:h.number??number,reference:h.reference,arabic:h.arabic,grade:h.grade||null,all_graders:Array.isArray(h.all_graders)?h.all_graders:[],chapter:h.chapter?.title||'',status:h.status||'not supplied',canonical,sourceEdition:h.source?.edition||'fawazahmed0/hadith-api',licence};
+    const record={id:book.id+':'+number,book:book.id,collection:book.name,number:h.number??number,reference:h.reference,arabic:h.arabic,grade:h.grade||null,all_graders:Array.isArray(h.all_graders)?h.all_graders:[],chapter:h.chapter?.title||'',status:h.status||'not supplied',canonical,sourceEdition:h.source?.edition||'fawazahmed0/hadith-api',licence:'Unlicense'};
     await dbPutHadith(record);
     p[book.id].count++;p[book.id].next=number+1;saveHadithProgress(p);await updateHadithProgress();
     if(status)status.textContent='Saved '+record.reference+' • '+(record.grade?.label||'Grade not supplied')+' • '+p[book.id].count+'/250 for '+book.name;

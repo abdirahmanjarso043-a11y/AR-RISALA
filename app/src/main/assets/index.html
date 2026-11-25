@@ -322,7 +322,7 @@ async function buildHadithLibrary(){
     if(!response.ok){if(response.status>=500){await waitHadith(5000);continue;}throw new Error('Source returned HTTP '+response.status+'. Saved progress is safe.');}
     let h;try{h=await response.json();}catch(e){throw new Error('The source returned unreadable data. Saved progress is safe.');}
     const licenceName=String(h?.licence?.arabic_text?.name||'').trim();
-    const isUnlicense=/^(?:the\\s+)?unlicense(?:\\s*\\(public-domain dedication\\))?$/i.test(licenceName);
+    const isUnlicense=/^(?:the\s+)?unlicense(?:\s*\(public-domain dedication\))?$/i.test(licenceName);
     const canonical=String(h?.canonical||'');
     if(!h?.arabic||typeof h.arabic!=='string'||!h.reference||!/^https:\/\//i.test(canonical)||!isUnlicense){
       p[book.id].next=number+1;saveHadithProgress(p);await waitHadith(1050);continue;

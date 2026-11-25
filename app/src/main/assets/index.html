@@ -243,32 +243,47 @@ async function updateHadithProgress(){const p=hadithProgress();let total=0;for(c
 const waitHadith=ms=>new Promise(r=>setTimeout(r,ms));
 async function buildHadithLibrary(){
  const btn=document.getElementById('build-hadith');if(btn)btn.disabled=true;
- const status=document.getElementById('build-status');if(status)status.textContent='Preparing resumable download…';
+ const status=document.getElementById('build-status');if(status)status.textContent='Checking saved records and preparing resume…';
  try{
   await hadithDB();const p=hadithProgress();
   for(const book of HADITH_COLLECTIONS){
    if(!p[book.id])p[book.id]={count:0,next:1};
+   // Reconcile progress against the actual IndexedDB records. This prevents a cleared
+   // browser database from falsely reporting records that no longer exist.
+   const existing=await dbGetHadith(book.id);
+   const valid=existing.filter(r=>r&&r.book===book.id&&r.arabic&&r.reference&&r.licence==='Unlicense');
+   p[book.id].count=valid.length;
+   if(valid.length>=250){saveHadithProgress(p);await updateHadithProgress();continue;}
+   const highest=valid.reduce((m,r)=>Math.max(m,Number(r.number)||0),0);
+   p[book.id].next=Math.max(Number(p[book.id].next)||1,highest+1);
+   saveHadithProgress(p);
    while(p[book.id].count<250){
     const number=p[book.id].next;
-    if(number>12000)throw new Error('Safety stop: unexpected reference gap in '+book.name+'. Saved progress is safe.');
+    if(number>12000)throw new Error('Safety stop: source did not provide enough permitted records for '+book.name+'. Saved progress is safe.');
     let response;
     try{response=await fetch('https://sahih-al-bukhari.com/api/v1/hadith/'+book.id+'/'+number);}
-    catch(e){throw new Error('Connection interrupted. Your saved progress is safe; tap Resume when online.');}
-    if(response.status===429){const retry=Number(response.headers.get('Retry-After')||60);if(status)status.textContent='Source rate limit reached. Waiting '+retry+' seconds; progress is safe.';await waitHadith(Math.max(10,retry)*1000);continue;}
+    catch(e){throw new Error('Connection interrupted. Saved records are safe; resume when online.');}
+    if(response.status===429){const raw=response.headers.get('Retry-After');const retry=Math.max(10,Math.min(300,Number(raw)||60));if(status)status.textContent='Source rate limit reached. Waiting '+retry+' seconds; saved progress is safe.';await waitHadith(retry*1000);continue;}
     if(response.status===404){p[book.id].next=number+1;saveHadithProgress(p);await updateHadithProgress();await waitHadith(1050);continue;}
-    if(!response.ok)throw new Error('Source returned HTTP '+response.status+'. Saved progress is safe.');
-    const h=await response.json();
-    if(!h.arabic||!h.reference||!h.canonical||!h.licence?.arabic_text){p[book.id].next=number+1;saveHadithProgress(p);await waitHadith(1050);continue;}
-    if(!String(h.licence.arabic_text.name||'').toLowerCase().includes('unlicense')){p[book.id].next=number+1;saveHadithProgress(p);await waitHadith(1050);continue;}
-    const record={id:book.id+':'+number,book:book.id,collection:book.name,number:h.number,reference:h.reference,arabic:h.arabic,grade:h.grade||null,all_graders:h.all_graders||[],chapter:h.chapter?.title||'',status:h.status||'ok',canonical:h.canonical,sourceEdition:h.source?.edition||'fawazahmed0/hadith-api',licence:h.licence.arabic_text.name};
-    await dbPutHadith(record);p[book.id].count++;p[book.id].next=number+1;saveHadithProgress(p);await updateHadithProgress();
-    if(status)status.textContent='Saved '+record.reference+' • '+record.grade?.label+' • '+p[book.id].count+'/250 for '+book.name;
+    if(!response.ok){if(response.status>=500){await waitHadith(5000);continue;}throw new Error('Source returned HTTP '+response.status+'. Saved progress is safe.');}
+    let h;try{h=await response.json();}catch(e){throw new Error('The source returned unreadable data. Saved progress is safe.');}
+    const licence=String(h?.licence?.arabic_text?.name||'').trim();
+    const canonical=String(h?.canonical||'');
+    if(!h?.arabic||typeof h.arabic!=='string'||!h.reference||!/^https:\/\//i.test(canonical)||licence.toLowerCase()!=='unlicense'){
+      p[book.id].next=number+1;saveHadithProgress(p);await waitHadith(1050);continue;
+    }
+    const record={id:book.id+':'+number,book:book.id,collection:book.name,number:h.number??number,reference:h.reference,arabic:h.arabic,grade:h.grade||null,all_graders:Array.isArray(h.all_graders)?h.all_graders:[],chapter:h.chapter?.title||'',status:h.status||'not supplied',canonical,sourceEdition:h.source?.edition||'fawazahmed0/hadith-api',licence};
+    await dbPutHadith(record);
+    p[book.id].count++;p[book.id].next=number+1;saveHadithProgress(p);await updateHadithProgress();
+    if(status)status.textContent='Saved '+record.reference+' • '+(record.grade?.label||'Grade not supplied')+' • '+p[book.id].count+'/250 for '+book.name;
     await waitHadith(1050);
    }
   }
-  if(status)status.textContent='Complete: 1,500 Arabic Hadith records saved on this device. English translations are not included.';
-  await searchSavedHadith('');
- }catch(e){if(status)status.textContent=e.message||'Download paused. Your saved progress is safe.';}
+  const finalCounts=await Promise.all(HADITH_COLLECTIONS.map(async b=>(await dbGetHadith(b.id)).filter(r=>r&&r.arabic&&r.reference&&r.licence==='Unlicense').length));
+  const total=finalCounts.reduce((a,n)=>a+n,0);
+  if(status)status.textContent=total===1500?'Complete: 1,500 permitted Arabic Hadith records verified and saved on this device. English translations are not included.':'Paused: '+total+' / 1,500 permitted records currently saved. Resume to continue.';
+  await updateHadithProgress();await searchSavedHadith('');
+ }catch(e){if(status)status.textContent=e.message||'Download paused. Saved progress is safe.';}
  finally{if(btn)btn.disabled=false;}
 }
 async function searchSavedHadith(query){

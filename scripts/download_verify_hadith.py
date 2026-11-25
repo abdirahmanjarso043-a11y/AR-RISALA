@@ -29,9 +29,11 @@ for book in BOOKS:
                 time.sleep(max(10, wait)); continue
             raise
         checked += 1
-        licence = str((payload.get("licence") or {}).get("arabic_text", {}).get("name", "")).strip().lower()
+        licence = str((payload.get("licence") or {}).get("arabic_text", {}).get("name", "")).strip()
+        licence_key = licence.casefold()
+        is_unlicense = licence_key in {"unlicense", "the unlicense (public-domain dedication)"}
         arabic = payload.get("arabic")
-        if isinstance(arabic, str) and arabic.strip() and licence == "unlicense":
+        if isinstance(arabic, str) and arabic.strip() and is_unlicense:
             texts.append(arabic.strip())
         number += 1
         if checked % 25 == 0:

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#102b24">
+<title>AR-RISALA</title>
+<style>
+:root{--bg:#f5f1e6;--green:#102b24;--gold:#c7a65a;--ink:#18251f;--muted:#66736b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Georgia,serif}
+header{padding:30px 22px 24px;background:linear-gradient(145deg,#102b24,#1e4938);color:#fff;border-radius:0 0 28px 28px}
+.brand{color:#e3c77e;letter-spacing:4px;font:700 12px Arial,sans-serif}
+h1{font-size:32px;margin:12px 0 5px}.owner{font:13px Arial,sans-serif;color:#d8e2da}
+header p{color:#e1e9e2;line-height:1.5;margin-bottom:0}
+nav{display:flex;gap:8px;overflow:auto;padding:16px 14px}
+nav button,.back{border:0;border-radius:22px;padding:11px 15px;background:#e5ddc9;color:var(--green);font-weight:bold;white-space:nowrap}
+nav button.active{background:var(--green);color:white}
+main{padding:4px 16px 28px;max-width:760px;margin:auto}
+.panel{background:#fffdf8;border:1px solid #e7dfce;border-radius:18px;padding:18px;margin:10px 0;box-shadow:0 5px 18px #253a2510}
+h2{color:var(--green);margin:4px 0 10px}h3{margin:0 0 6px;color:#284d3d}
+p{line-height:1.55}.muted{color:var(--muted);font:13px Arial,sans-serif}
+.item{padding:14px 0;border-bottom:1px solid #eee7d9}.item:last-child{border:0}
+.item button{border:0;background:none;text-align:left;color:inherit;width:100%;font:inherit;padding:0}
+.arabic{font-size:25px;line-height:1.9;text-align:right;color:#244c3b}
+.search{width:100%;padding:13px;border:1px solid #d8d0bf;border-radius:12px;font-size:16px;margin:8px 0 12px}
+footer{text-align:center;padding:20px;color:#6f786f;font:12px Arial,sans-serif}
+</style>
+</head>
+<body>
+<header><div class="brand">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div><h1>AR-RISALA</h1><div class="owner">Knowledge • Faith • Guidance</div><p>A place to learn the Qur’an, authentic Hadith and the lives of the Companions.</p></header>
+<nav id="nav"><button class="active" data-tab="home">Home</button><button data-tab="quran">Qur’an</button><button data-tab="hadith">Hadith</button><button data-tab="sahaba">Sahaba</button><button data-tab="about">About</button></nav>
+<main id="content"></main><footer>AR-RISALA • Built with care for seekers of knowledge</footer>
+<script>
+const surahs=["Al-Fatihah","Al-Baqarah","Aal-Imran","An-Nisa","Al-Ma'idah","Al-An'am","Al-A'raf","Al-Anfal","At-Tawbah","Yunus","Hud","Yusuf","Ar-Ra'd","Ibrahim","Al-Hijr","An-Nahl","Al-Isra","Al-Kahf","Maryam","Ta-Ha","Al-Anbiya","Al-Hajj","Al-Mu'minun","An-Nur","Al-Furqan","Ash-Shu'ara","An-Naml","Al-Qasas","Al-Ankabut","Ar-Rum","Luqman","As-Sajdah","Al-Ahzab","Saba","Fatir","Ya-Sin","As-Saffat","Sad","Az-Zumar","Ghafir","Fussilat","Ash-Shura","Az-Zukhruf","Ad-Dukhan","Al-Jathiyah","Al-Ahqaf","Muhammad","Al-Fath","Al-Hujurat","Qaf","Adh-Dhariyat","At-Tur","An-Najm","Al-Qamar","Ar-Rahman","Al-Waqi'ah","Al-Hadid","Al-Mujadilah","Al-Hashr","Al-Mumtahanah","As-Saff","Al-Jumu'ah","Al-Munafiqun","At-Taghabun","At-Talaq","At-Tahrim","Al-Mulk","Al-Qalam","Al-Haqqah","Al-Ma'arij","Nuh","Al-Jinn","Al-Muzzammil","Al-Muddaththir","Al-Qiyamah","Al-Insan","Al-Mursalat","An-Naba","An-Nazi'at","Abasa","At-Takwir","Al-Infitar","Al-Mutaffifin","Al-Inshiqaq","Al-Buruj","At-Tariq","Al-A'la","Al-Ghashiyah","Al-Fajr","Al-Balad","Ash-Shams","Al-Layl","Ad-Duha","Ash-Sharh","At-Tin","Al-Alaq","Al-Qadr","Al-Bayyinah","Az-Zalzalah","Al-Adiyat","Al-Qari'ah","At-Takathur","Al-Asr","Al-Humazah","Al-Fil","Quraysh","Al-Ma'un","Al-Kawthar","Al-Kafirun","An-Nasr","Al-Masad","Al-Ikhlas","Al-Falaq","An-Nas"];
+const sahaba=[["Abu Bakr as-Siddiq","The first Caliph and one of the earliest believers; known for his truthfulness and steadfast support of the Prophet ﷺ."],["Umar ibn al-Khattab","The second Caliph, remembered for justice, courage and care for the community."],["Uthman ibn Affan","The third Caliph, known for generosity and his role in the standardisation of the Qur’anic codex."],["Ali ibn Abi Talib","The fourth Caliph, cousin and son-in-law of the Prophet ﷺ, renowned for knowledge and courage."],["Khadijah bint Khuwaylid","The first believer and the beloved wife who supported the Prophet ﷺ from the beginning."],["Bilal ibn Rabah","An early Muslim remembered for steadfast faith and as the first muezzin."],["Abd al-Rahman ibn Awf","A companion known for generosity, business integrity and service."],["Talhah ibn Ubayd Allah","A companion remembered for bravery and devotion at Uhud."],["Zubayr ibn al-Awwam","A close companion and one of the ten promised Paradise."],["Sa'd ibn Abi Waqqas","An early Muslim and skilled commander who led the campaign at al-Qadisiyyah."]];
+const hadith=[["Actions are judged by intentions","“Actions are but by intentions, and every person will have only what they intended.”","Sahih al-Bukhari 1; Sahih Muslim 1907","Authenticity: Sahih"],["The best among you","“The best of you are those who learn the Qur’an and teach it.”","Sahih al-Bukhari 5027","Authenticity: Sahih"],["Speak good or remain silent","“Whoever believes in Allah and the Last Day should speak good or remain silent.”","Sahih al-Bukhari 6018; Sahih Muslim 47","Authenticity: Sahih"],["Mercy","“Those who show mercy will be shown mercy by the Most Merciful.”","Jami at-Tirmidhi 1924","Authenticity: Hasan Sahih"]];
+function show(tab){document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));const c=document.getElementById('content');
+if(tab==='home')c.innerHTML='<section class="panel"><h2>Assalamu Alaikum</h2><p>Welcome to AR-RISALA. Explore the Qur’an, study Hadith and learn about the noble Companions.</p><p class="muted">Choose a section above to begin.</p></section><section class="panel"><h3>Our purpose</h3><p>Authentic knowledge, clear references and respectful learning.</p></section>';
+if(tab==='quran')c.innerHTML='<section class="panel"><h2>The Holy Qur’an</h2><p class="muted">114 Surah index • Arabic text and translations are being added from verified sources.</p><input class="search" placeholder="Search Surah..." oninput="filterList(this.value,\'surah-list\')"><div id="surah-list">'+surahs.map((s,i)=>'<div class="item"><strong>'+(i+1)+'. '+s+'</strong><div class="muted">Surah '+(i+1)+'</div></div>').join('')+'</div></section>';
+if(tab==='hadith')c.innerHTML='<section class="panel"><h2>Hadith collection</h2><p class="muted">Sample verified narrations with collection references. The planned 1,500-entry collection will be added in reviewed batches.</p>'+hadith.map(h=>'<div class="item"><h3>'+h[0]+'</h3><p>'+h[1]+'</p><div class="muted">'+h[2]+' • '+h[3]+'</div></div>').join('')+'</section>';
+if(tab==='sahaba')c.innerHTML='<section class="panel"><h2>Lives of the Sahaba</h2><p class="muted">A first set of biographies. The planned 150 biographies will be expanded with reliable references.</p><input class="search" placeholder="Search Companion..." oninput="filterList(this.value,\'sahaba-list\')"><div id="sahaba-list">'+sahaba.map(s=>'<div class="item"><h3>'+s[0]+'</h3><p>'+s[1]+'</p></div>').join('')+'</div></section>';
+if(tab==='about')c.innerHTML='<section class="panel"><h2>About AR-RISALA</h2><p>Knowledge • Faith • Guidance</p><p>Created by <strong>Abdirahman Jarso (Abjata)</strong>.</p><p>May Allah make this project beneficial and accept it as a source of ongoing good.</p></section>';
+}
+function filterList(q,id){document.querySelectorAll('#'+id+' .item').forEach(el=>el.style.display=el.textContent.toLowerCase().includes(q.toLowerCase())?'':'none')}
+document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>show(b.dataset.tab)));show('home');
+</script>
+</body></html>

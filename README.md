@@ -9,7 +9,7 @@ An Android Islamic learning app by **Abdirahman Jarso (Abjata)**.
 - Android app built with Java and a local WebView interface.
 - Home, Qur'an, Hadith, Sahaba and About sections.
 - Qur'an index containing all 114 Surah names. Selecting a Surah requests the complete Uthmani Arabic text and Sahih International English translation from AlQuran Cloud. An internet connection is required for full Surah reading.
-- Hadith reader that can request a numbered narration from six collections (Bukhari, Muslim, Abu Dawud, Tirmidhi, Nasa'i and Ibn Majah), displaying Arabic text, available grading, chapter and source link. English translations are not provided by this API.
+- Hadith reader for six collections, plus a resumable in-app builder that downloads and caches 250 permitted Arabic records per collection (1,500 total) in IndexedDB. The builder preserves source references, available grades/graders, review status and canonical source links. It observes the provider's request limit. English translations are not included because their redistribution rights are not cleared.
 - 150 starter Sahaba biographies, plus links to independent further-reading resources.
 - Search within the Surah and starter Sahaba lists.
 - Offline-first caching: Surahs and Hadith records successfully opened online are saved in the app's WebView storage for later reading on the same device. First-time downloads still require internet; this is not a preloaded offline library.
@@ -21,7 +21,7 @@ An Android Islamic learning app by **Abdirahman Jarso (Abjata)**.
 This is a working foundation, **not yet the finished 1,500-Hadith / 150-Sahaba edition**.
 
 - Qur'an text is fetched online rather than bundled for offline use. Verify the chosen text and translation before publication.
-- The Hadith reader can retrieve numbered records from supported collections, but it is not yet a reviewed, curated in-app set of 1,500 entries, and it has no English translations.
+- The 1,500-record offline cache is built on the user's device after tapping Build / Resume in the Hadith tab; it is not preloaded into the APK. The download requires internet and can take about 25–30 minutes at the source's published rate limit. English translations are not included.
 - The app currently contains 150 short Sahaba entries. These are starter summaries; individual source verification and qualified editorial review are still required.
 - A full preloaded offline Qur'an/Hadith library, and a signed release build are still future work.
 

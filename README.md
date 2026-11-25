@@ -4,22 +4,34 @@
 
 An Android Islamic learning app by **Abdirahman Jarso (Abjata)**.
 
-## Current project status
+## Current working features
 
-The repository now contains an Android Gradle application and a GitHub Actions workflow that builds a debug APK. The app opens an offline-friendly home screen with Qur'an surah index, Hadith sample cards, Sahaba biographies, search within the visible lists, and an About page.
+- Android app built with Java and a local WebView interface.
+- Home, Qur'an, Hadith, Sahaba and About sections.
+- Qur'an index containing all 114 Surah names. Selecting a Surah requests the complete Uthmani Arabic text and Sahih International English translation from AlQuran Cloud. An internet connection is required for full Surah reading.
+- Hadith reader that can request a numbered narration from six collections (Bukhari, Muslim, Abu Dawud, Tirmidhi, Nasa'i and Ibn Majah), displaying Arabic text, available grading, chapter and source link. English translations are not provided by this API.
+- Ten starter Sahaba biographies, plus links to independent further-reading resources.
+- Search within the Surah and starter Sahaba lists.
+- GitHub Actions workflow builds a debug APK on pushes to the default branch.
 
-## Planned content
+## Content still to complete
 
-- Complete Qur'an: all 114 surahs with verified Arabic text and carefully sourced translations.
-- 1,500 Hadith with collection references and authenticity grading where available.
-- 150 Sahaba biographies with reliable historical references.
-- Offline reading, bookmarks, search, and accessible Arabic typography.
+This is a working foundation, **not yet the finished 1,500-Hadith / 150-Sahaba edition**.
 
-**Important:** The current interface is a foundation, not yet the complete library. The Qur'an index is present, but the full ayah text is not yet bundled. The Hadith and Sahaba entries currently shown are a small initial sample. Content will be added in reviewed batches to avoid fabricated or incorrectly attributed religious texts.
+- Qur'an text is fetched online rather than bundled for offline use. Verify the chosen text and translation before publication.
+- The Hadith reader can retrieve numbered records from supported collections, but it is not yet a reviewed, curated in-app set of 1,500 entries, and it has no English translations.
+- The app currently contains ten short Sahaba summaries. The remaining biographies, source notes and editorial review are still required.
+- Offline Qur'an/Hadith content, bookmarks, and a signed release build are still future work.
+
+Religious content must be checked against reliable sources. Do not invent wording, grading, historical details or attributions.
+
+## Sources and attribution
+
+See [SOURCES.md](SOURCES.md) for data providers, attribution and known limitations.
 
 ## Build APK
 
-A push to `main` triggers the workflow in **Actions → Build AR-RISALA APK**. When the run succeeds, download the `AR-RISALA-debug-apk` artifact from that workflow run. A debug APK is for testing; a signed release build is needed for distribution.
+A push to the default branch triggers **Actions → Build AR-RISALA APK**. When the run succeeds, download the `AR-RISALA-debug-apk` artifact from that run. A debug APK is for testing; a signed release build is needed for distribution.
 
 ## Build locally
 

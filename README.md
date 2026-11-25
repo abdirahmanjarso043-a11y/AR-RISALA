@@ -13,6 +13,7 @@ An Android Islamic learning app by **Abdirahman Jarso (Abjata)**.
 - Ten starter Sahaba biographies, plus links to independent further-reading resources.
 - Search within the Surah and starter Sahaba lists.
 - Offline-first caching: Surahs and Hadith records successfully opened online are saved in the app's WebView storage for later reading on the same device. First-time downloads still require internet; this is not a preloaded offline library.
+- On-device bookmarks for individual Qur'an verses and Hadith records, with a Saved section.
 - GitHub Actions workflow builds a debug APK on pushes to the default branch.
 
 ## Content still to complete
@@ -22,7 +23,7 @@ This is a working foundation, **not yet the finished 1,500-Hadith / 150-Sahaba e
 - Qur'an text is fetched online rather than bundled for offline use. Verify the chosen text and translation before publication.
 - The Hadith reader can retrieve numbered records from supported collections, but it is not yet a reviewed, curated in-app set of 1,500 entries, and it has no English translations.
 - The app currently contains ten short Sahaba summaries. The remaining biographies, source notes and editorial review are still required.
-- A full preloaded offline Qur'an/Hadith library, bookmarks, and a signed release build are still future work.
+- A full preloaded offline Qur'an/Hadith library, and a signed release build are still future work.
 
 Religious content must be checked against reliable sources. Do not invent wording, grading, historical details or attributions.
 

@@ -36,7 +36,7 @@ const hadith=[["Actions are judged by intentions","“Actions are but by intenti
 function show(tab){document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));const c=document.getElementById('content');
 if(tab==='home')c.innerHTML='<section class="panel"><h2>Assalamu Alaikum</h2><p>Welcome to AR-RISALA. Explore the Qur’an, study Hadith and learn about the noble Companions.</p><p class="muted">Choose a section above to begin.</p></section><section class="panel"><h3>Our purpose</h3><p>Authentic knowledge, clear references and respectful learning.</p></section>';
 if(tab==='quran')c.innerHTML='<section class="panel"><h2>The Holy Qur’an</h2><p class="muted">All 114 Surahs. Select any Surah to load its complete Arabic text and Sahih International English translation. Internet connection is required.</p><input class="search" placeholder="Search Surah..." oninput="filterList(this.value,\\'surah-list\\')"><div id="surah-list">'+surahs.map((s,i)=>'<div class="item"><button onclick="openSurah('+(i+1)+')"><strong>'+(i+1)+'. '+s+'</strong><div class="muted">Open Surah '+(i+1)+' →</div></button></div>').join('')+'</div><div id="surah-detail"></div></section>';
-if(tab==='hadith')c.innerHTML='<section class="panel"><h2>Hadith collection</h2><p class="muted">Sample verified narrations with collection references. The planned 1,500-entry collection will be added in reviewed batches.</p>'+hadith.map(h=>'<div class="item"><h3>'+h[0]+'</h3><p>'+h[1]+'</p><div class="muted">'+h[2]+' • '+h[3]+'</div></div>').join('')+'</section>';
+if(tab==='hadith')c.innerHTML='<section class="panel"><h2>Hadith Library</h2><p class="muted">Browse the six major Hadith collections. Choose a book and reference number to load the Arabic narration, chapter, source and available grading. English translations are not supplied by this source.</p><label for="hadith-book">Collection</label><select id="hadith-book" class="search"><option value="bukhari">Sahih al-Bukhari</option><option value="muslim">Sahih Muslim</option><option value="abudawud">Sunan Abi Dawud</option><option value="tirmidhi">Jami at-Tirmidhi</option><option value="nasai">Sunan an-Nasa’i</option><option value="ibnmajah">Sunan Ibn Majah</option></select><label for="hadith-number">Hadith number</label><input id="hadith-number" class="search" type="number" min="1" value="1" placeholder="Enter hadith number"><button class="back" onclick="loadHadith()">Read Hadith</button><div id="hadith-detail" class="item"><p class="muted">Select a collection and number, then tap Read Hadith.</p></div><p class="muted">Data and grading attribution: Sahih al-Bukhari API. Always check the linked source and consult qualified scholars for interpretation.</p></section>'
 if(tab==='sahaba')c.innerHTML='<section class="panel"><h2>Lives of the Sahaba</h2><p class="muted">A first set of biographies. The planned 150 biographies will be expanded with reliable references.</p><input class="search" placeholder="Search Companion..." oninput="filterList(this.value,\'sahaba-list\')"><div id="sahaba-list">'+sahaba.map(s=>'<div class="item"><h3>'+s[0]+'</h3><p>'+s[1]+'</p></div>').join('')+'</div></section>';
 if(tab==='about')c.innerHTML='<section class="panel"><h2>About AR-RISALA</h2><p>Knowledge • Faith • Guidance</p><p>Created by <strong>Abdirahman Jarso (Abjata)</strong>.</p><p>May Allah make this project beneficial and accept it as a source of ongoing good.</p></section>';
 }
@@ -66,6 +66,22 @@ function renderSurah(n,data){
  const d=document.getElementById('surah-detail');
  d.innerHTML='<div class="item"><h3>Surah '+n+': '+data.name+'</h3><p class="muted">Arabic text: Uthmani script • English translation: Sahih International • Source: AlQuran Cloud</p>'+data.verses.map((v,i)=>'<div class="item"><div class="arabic">'+v[0]+' <span class="muted">۞ '+(i+1)+'</span></div><p>'+v[1]+'</p></div>').join('')+'</div>';
  d.scrollIntoView({behavior:"smooth",block:"start"});
+}
+async function loadHadith(){
+ const book=document.getElementById('hadith-book').value;
+ const number=Number(document.getElementById('hadith-number').value);
+ const box=document.getElementById('hadith-detail');
+ if(!Number.isInteger(number)||number<1){box.innerHTML='<p>Please enter a valid Hadith number.</p>';return;}
+ box.innerHTML='<p>Loading Hadith…</p>';
+ try{
+  const res=await fetch('https://sahih-al-bukhari.com/api/v1/hadith/'+book+'/'+number);
+  if(!res.ok)throw new Error('Reference not available');
+  const h=await res.json();
+  if(h.status!=='ok'||!h.arabic)throw new Error('This reference is not available in the source.');
+  const grade=h.grade&&h.grade.label?h.grade.label:'Not supplied';
+  const chapter=h.chapter&&h.chapter.title?h.chapter.title:'Chapter not supplied';
+  box.innerHTML='<h3>'+h.reference+'</h3><p class="muted">'+chapter+'</p><div class="arabic">'+h.arabic+'</div><p><strong>Grade:</strong> '+grade+(h.grade&&h.grade.grader?' — '+h.grade.grader:'')+'</p><p class="muted">Source edition: '+(h.source&&h.source.edition?h.source.edition:'not supplied')+'</p><p><a href="'+h.canonical+'" target="_blank" rel="noopener">Open source record</a></p>';
+ }catch(e){box.innerHTML='<p>That number could not be loaded. Check the number or choose another collection.</p><button class="back" onclick="loadHadith()">Try again</button>';}
 }
 function filterList(q,id){document.querySelectorAll('#'+id+' .item').forEach(el=>el.style.display=el.textContent.toLowerCase().includes(q.toLowerCase())?'':'none')}
 document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>show(b.dataset.tab)));show('home');

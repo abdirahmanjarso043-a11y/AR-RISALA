@@ -33,5 +33,5 @@ The sahih-al-bukhari.com API documents a narrower Arabic reuse policy: it serves
 5. Deduplicate only when the source identity and wording justify it; preserve meaningful variants.
 6. A 1,500-item target is not complete until all 1,500 records pass source, text, reference, grading, and rights checks.
 
-## Current status
-The app currently offers an online reference-number lookup. It does not yet contain a verified offline dataset of 1,500 Hadith. This document records the acceptance criteria; it is not a claim that the target dataset has been completed.
+## Implementation status (2026-11-25)
+The Android app now contains a resumable Hadith-library builder. On the user's device it requests up to 250 eligible records per collection from the Words of Rasulullah API, verifies that each response carries an Unlicense Arabic-text declaration, and stores the returned record in IndexedDB. It retains source reference, Arabic matn, grade and grader fields, all-graders data where supplied, chapter, review status and canonical source link. It skips unavailable or licence-excluded references and resumes from the last saved number. The provider documents a limit of 60 requests/minute and 2,000/day; the builder waits between requests. The 1,500 records are not embedded in the APK: the user must tap Build / Resume while online. The cache is local to that device. The implementation is committed, but the 1,500-record download has not yet been run or independently reviewed. English translations remain excluded pending confirmed redistribution rights.

@@ -189,7 +189,7 @@ const sahaba=[
 const hadith=[["Actions are judged by intentions","“Actions are but by intentions, and every person will have only what they intended.”","Sahih al-Bukhari 1; Sahih Muslim 1907","Authenticity: Sahih"],["The best among you","“The best of you are those who learn the Qur’an and teach it.”","Sahih al-Bukhari 5027","Authenticity: Sahih"],["Speak good or remain silent","“Whoever believes in Allah and the Last Day should speak good or remain silent.”","Sahih al-Bukhari 6018; Sahih Muslim 47","Authenticity: Sahih"],["Mercy","“Those who show mercy will be shown mercy by the Most Merciful.”","Jami at-Tirmidhi 1924","Authenticity: Hasan Sahih"]];
 function show(tab){document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));const c=document.getElementById('content');
 if(tab==='home')c.innerHTML='<section class="panel"><h2>Assalamu Alaikum</h2><p>Welcome to AR-RISALA. Explore the Qur’an, study Hadith and learn about the noble Companions.</p><p class="muted">Choose a section above to begin.</p></section><section class="panel"><h3>Library progress</h3><p><strong>Qur’an:</strong> all 114 Surahs are listed; complete text and Sahih International translation load online, with opened Surahs cached on this device.</p><p><strong>Sahaba:</strong> 150 Companion biographies are included. Names are being checked against classical biographical sources.</p><p><strong>Hadith:</strong> six collection choices are available for online reference lookup; the planned verified set of 1,500 Hadith is not yet complete.</p></section><section class="panel"><h3>Our purpose</h3><p>Careful learning, clear references and respectful study.</p></section>';
-if(tab==='quran')c.innerHTML='<section class="panel"><h2>The Holy Qur’an</h2><p class="muted">All 114 Surahs. Select any Surah to load its complete Arabic text and Sahih International English translation. Internet connection is required.</p><input class="search" placeholder="Search Surah..." oninput="filterList(this.value,\\'surah-list\\')"><div id="surah-list">'+surahs.map((s,i)=>'<div class="item"><button onclick="openSurah('+(i+1)+')"><strong>'+(i+1)+'. '+s+'</strong><div class="muted">Open Surah '+(i+1)+' →</div></button></div>').join('')+'</div><div id="surah-detail"></div></section>';
+if(tab==='quran')c.innerHTML='<section class="panel"><h2>The Holy Qur’an</h2><p class="muted">All 114 Surahs. Open any Surah online, or download the complete Qur’an for offline reading on this device.</p><button class="back" id="download-quran" onclick="downloadAllQuran()">Download all 114 Surahs for offline use</button><p id="quran-download-status" class="muted">Offline copies are stored on this device only.</p><input class="search" placeholder="Search Surah..." oninput="filterList(this.value,\\'surah-list\\')"><div id="surah-list">'+surahs.map((s,i)=>'<div class="item"><button onclick="openSurah('+(i+1)+')"><strong>'+(i+1)+'. '+s+'</strong><div class="muted">Open Surah '+(i+1)+' →</div></button></div>').join('')+'</div><div id="surah-detail"></div></section>';
 if(tab==='hadith')c.innerHTML='<section class="panel"><h2>Hadith Library — 1,500</h2><p class="muted">Build a personal offline library of 250 permitted Arabic records from each of the six collections. Grading and source notes are shown exactly as the provider supplies them. English translations are not included because their reuse rights are not cleared.</p><button class="back" id="build-hadith" onclick="buildHadithLibrary()">Build / Resume 1,500 Hadith</button><p id="build-status" class="muted">The download can resume after interruption. Keep this screen open and connected to the internet.</p><progress id="build-progress" value="0" max="1500" style="width:100%;height:14px"></progress><label for="hadith-book">Collection</label><select id="hadith-book" class="search"><option value="bukhari">Sahih al-Bukhari</option><option value="muslim">Sahih Muslim</option><option value="abudawud">Sunan Abi Dawud</option><option value="tirmidhi">Jami at-Tirmidhi</option><option value="nasai">Sunan an-Nasa’i</option><option value="ibnmajah">Sunan Ibn Majah</option></select><input id="hadith-search" class="search" placeholder="Search downloaded Arabic Hadith or reference" oninput="searchSavedHadith(this.value)"><div id="saved-hadith-results"></div><label for="hadith-number">Read a reference number online</label><input id="hadith-number" class="search" type="number" min="1" value="1" placeholder="Enter hadith number"><button class="back" onclick="loadHadith()">Read Hadith</button><div id="hadith-detail" class="item"><p class="muted">Tap Build / Resume to download the selected 1,500-record library.</p></div><p class="muted">Arabic source: fawazahmed0/hadith-api, via Words of Rasulullah API. Source records are linked individually. Grading is not a legal ruling; consult qualified scholarship.</p></section>';
 if(tab==='sahaba')c.innerHTML='<section class="panel"><h2>Lives of the Sahaba</h2><p class="muted">150 Companion biographies are included. Names are being checked against classical biographical sources. Each entry has a short summary and source notes; further reading links are provided below.</p><input class="search" placeholder="Search Companion..." oninput="filterList(this.value,\'sahaba-list\')"><div id="sahaba-list">'+sahaba.map(s=>'<div class="item"><h3>'+s[0]+'</h3><p>'+s[1]+'</p><p class="muted"><strong>Further sources:</strong> '+s[2]+'</p></div>').join('')+'</div><div class="item"><h3>Further reading and source works</h3><p><a href="https://sahibukum.com/companions/" target="_blank" rel="noopener">Read a referenced collection of 140 Companion biographies</a></p><p><a href="https://revivesahaba.com/sources/" target="_blank" rel="noopener">See classical source books and bibliography</a></p><p class="muted">The external biographies are independent resources, not written or owned by AR-RISALA.</p></div></section>';
 if(tab==='saved')c.innerHTML='<section class="panel"><h2>My Bookmarks</h2><p class="muted">Saved verses and Hadith stay on this device.</p><div id="saved-list"></div></section>';renderBookmarks();
@@ -197,6 +197,47 @@ if(tab==='about')c.innerHTML='<section class="panel"><h2>About AR-RISALA</h2><p>
 }
 const quranText={1:{name:"Al-Fatihah",verses:[["بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ","In the name of Allah, the Most Compassionate, the Most Merciful."],["الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ","All praise is for Allah—Lord of all worlds."],["الرَّحْمَٰنِ الرَّحِيمِ","The Most Compassionate, the Most Merciful."],["مَالِكِ يَوْمِ الدِّينِ","Master of the Day of Judgment."],["إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ","You alone we worship and You alone we ask for help."],["اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ","Guide us along the Straight Path."],["صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ","The Path of those You have blessed—not those You are displeased with, or those who are astray."]]},112:{name:"Al-Ikhlas",verses:[["قُلْ هُوَ اللَّهُ أَحَدٌ","Say, ˹O Prophet,˺ “He is Allah—One ˹and Indivisible˺.”"],["اللَّهُ الصَّمَدُ","Allah—the Sustainer ˹needed by all˺."],["لَمْ يَلِدْ وَلَمْ يُولَدْ","He has never had offspring, nor was He born."],["وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ","And there is none comparable to Him."]]}};
 const surahCache={};
+let quranDbPromise;
+function quranDB(){
+ if(quranDbPromise)return quranDbPromise;
+ quranDbPromise=new Promise((resolve,reject)=>{
+  if(!window.indexedDB){reject(new Error('Offline storage is not supported on this device'));return;}
+  const req=indexedDB.open('AR_RISALA_QURAN',1);
+  req.onupgradeneeded=()=>{const db=req.result;if(!db.objectStoreNames.contains('surahs'))db.createObjectStore('surahs',{keyPath:'number'});};
+  req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);
+ });
+ return quranDbPromise;
+}
+async function getCachedSurah(n){
+ try{const db=await quranDB();return await new Promise((resolve,reject)=>{const tx=db.transaction('surahs','readonly');const req=tx.objectStore('surahs').get(n);req.onsuccess=()=>resolve(req.result?.data||null);req.onerror=()=>reject(req.error);});}
+ catch(e){return readOffline('surah_'+n);}
+}
+async function saveCachedSurah(n,data){
+ try{const db=await quranDB();await new Promise((resolve,reject)=>{const tx=db.transaction('surahs','readwrite');tx.objectStore('surahs').put({number:n,data});tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});return true;}
+ catch(e){return writeOffline('surah_'+n,data);}
+}
+async function downloadAllQuran(){
+ const btn=document.getElementById('download-quran'),status=document.getElementById('quran-download-status');
+ if(btn)btn.disabled=true;
+ try{
+  const db=await quranDB();let completed=0;
+  for(let n=1;n<=114;n++){
+   const cached=await getCachedSurah(n);
+   if(cached&&Array.isArray(cached.verses)&&cached.verses.length){completed++;if(status)status.textContent='Offline Qur’an: '+completed+' / 114 Surahs ready.';continue;}
+   if(status)status.textContent='Downloading Surah '+n+' of 114: '+surahs[n-1]+'…';
+   const response=await fetch('https://api.alquran.cloud/v1/surah/'+n+'/editions/quran-uthmani,en.sahih');
+   if(!response.ok)throw new Error('Network error while downloading Surah '+n+'. Your saved Surahs are safe; tap resume when online.');
+   const payload=await response.json();
+   if(payload.code!==200||!payload.data||payload.data.length<2||!Array.isArray(payload.data[0].ayahs)||!Array.isArray(payload.data[1].ayahs)||payload.data[0].ayahs.length!==payload.data[1].ayahs.length||!payload.data[0].ayahs.length)throw new Error('The source returned incomplete data for Surah '+n+'. Saved Surahs are safe; tap resume to continue.');
+   const data={name:payload.data[0].englishName||surahs[n-1],verses:payload.data[0].ayahs.map((a,i)=>[a.text,payload.data[1].ayahs[i].text||''])};
+   await saveCachedSurah(n,data);surahCache[n]=data;completed++;
+   if(status)status.textContent='Offline Qur’an: '+completed+' / 114 Surahs ready.';
+   await new Promise(resolve=>setTimeout(resolve,180));
+  }
+  if(status)status.textContent='Complete: all 114 Surahs are saved for offline reading on this device.';
+ }catch(e){if(status)status.textContent=e.message||'Download stopped. Your saved Surahs are safe; try again when connected.';}
+ finally{if(btn)btn.disabled=false;}
+}
 function readOffline(key){try{return JSON.parse(localStorage.getItem('ar_risala_'+key)||'null')}catch(e){return null}}
 function writeOffline(key,value){try{localStorage.setItem('ar_risala_'+key,JSON.stringify(value));return true}catch(e){return false}}
 async function openSurah(n){
@@ -204,7 +245,7 @@ async function openSurah(n){
  d.innerHTML='<div class="item"><h3>Surah '+n+': '+surahs[n-1]+'</h3><p>Loading verified Qur’an text and English translation…</p></div>';
  d.scrollIntoView({behavior:"smooth",block:"start"});
  if(surahCache[n]){renderSurah(n,surahCache[n]);return;}
- const savedSurah=readOffline('surah_'+n);
+ const savedSurah=await getCachedSurah(n);
  if(savedSurah){surahCache[n]=savedSurah;renderSurah(n,savedSurah);return;}
  try{
   const response=await fetch('https://api.alquran.cloud/v1/surah/'+n+'/editions/quran-uthmani,en.sahih');
@@ -214,7 +255,7 @@ async function openSurah(n){
   const arabic=payload.data[0].ayahs,english=payload.data[1].ayahs;
   const verses=arabic.map((a,i)=>[a.text,english[i]?english[i].text:'']);
   surahCache[n]={name:payload.data[0].englishName||surahs[n-1],verses};
-  writeOffline('surah_'+n,surahCache[n]);
+  await saveCachedSurah(n,surahCache[n]);
   renderSurah(n,surahCache[n]);
  }catch(error){
   const local=quranText[n];

@@ -24,9 +24,19 @@ for book in BOOKS:
             if e.code == 404:
                 number += 1; checked += 1; time.sleep(DELAY); continue
             if e.code == 429 or 500 <= e.code < 600:
-                wait = min(300, int(e.headers.get("Retry-After", "60")) if e.headers else 60)
-                print(f"{book}: HTTP {e.code}; waiting {wait}s", flush=True)
-                time.sleep(max(10, wait)); continue
+                retries = transient_retries.get((book, number), 0) + 1
+                transient_retries[(book, number)] = retries
+                if retries > 8:
+                    raise RuntimeError(f"{book}/{number}: stopped after {retries - 1} transient HTTP failures") from e
+                retry_after = e.headers.get("Retry-After", "") if e.headers else ""
+                try:
+                    wait = int(retry_after)
+                except (TypeError, ValueError):
+                    wait = min(180, 10 * (2 ** (retries - 1)))
+                wait = max(5, min(300, wait))
+                print(f"{book}/{number}: HTTP {e.code}; retry {retries}/8 in {wait}s", flush=True)
+                time.sleep(wait)
+                continue
             raise
         checked += 1
         licence = str((payload.get("licence") or {}).get("arabic_text", {}).get("name", "")).strip()

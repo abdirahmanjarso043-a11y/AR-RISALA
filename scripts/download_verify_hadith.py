@@ -72,10 +72,8 @@ for book in BOOKS:
                 if error.code == 404:
                     continue
                 errors.append(f"{url}: HTTP {error.code}")
-                if error.code == 429 or 500 <= error.code < 600:
-                    time.sleep(2)
-                    continue
-                raise
+                time.sleep(2)
+                continue
             except Exception as error:
                 errors.append(f"{url}: {error}")
                 time.sleep(1)
@@ -113,17 +111,17 @@ for book in BOOKS:
             print(f"{book}: {len(texts)}/{target} accepted; checked {checked}", flush=True)
 
     if len(texts) != target:
-        raise RuntimeError(f"{book}: only {len(texts)} records passed checks; needed {TARGET}")
+        raise RuntimeError(f"{book}: only {len(texts)} records passed checks; needed {target}")
     library[book] = texts
     report[book] = {"accepted": len(texts), "checked": checked, "records": records}
     print(f"VERIFIED {book}: {len(texts)} Arabic records", flush=True)
 
 assert len(library) == 6
-assert sum(map(len, library.values())) == 1500
+assert sum(map(len, library.values())) == args.total
 assert all(len(report[b]["records"]) == quotas[b] for b in BOOKS)
 
 os.makedirs("build/hadith", exist_ok=True)
-with open("build/hadith/ar-risala-hadith-arabic-{args.total}.json", "w", encoding="utf-8") as output:
+with open(f"build/hadith/ar-risala-hadith-arabic-{args.total}.json", "w", encoding="utf-8") as output:
     json.dump(library, output, ensure_ascii=False, separators=(",", ":"))
 with open("build/hadith/verification-report.json", "w", encoding="utf-8") as output:
     json.dump({

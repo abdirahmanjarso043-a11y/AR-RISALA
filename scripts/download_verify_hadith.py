@@ -139,7 +139,7 @@ assert all(len(report[b]["records"]) == quotas[b] for b in BOOKS)
 os.makedirs("build/hadith", exist_ok=True)
 with open(f"build/hadith/ar-risala-hadith-arabic-{args.total}-batch-{args.batch_number}.json", "w", encoding="utf-8") as output:
     json.dump(library, output, ensure_ascii=False, separators=(",", ":"))
-with open("build/hadith/verification-report.json", "w", encoding="utf-8") as output:
+with open(f"build/hadith/verification-report-batch-{args.batch_number}.json", "w", encoding="utf-8") as output:
     json.dump({
         "total": args.total,
         "batch_number": args.batch_number,

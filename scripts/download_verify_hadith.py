@@ -8,13 +8,19 @@ the repository under The Unlicense. We retain a source URL and SHA-256 per text.
 import hashlib
 import json
 import os
+import argparse
 import time
 import urllib.error
 import urllib.request
 
 BOOKS = ["bukhari", "muslim", "abudawud", "tirmidhi", "nasai", "ibnmajah"]
-TARGET = 250
 MAX_NUMBER = 2000
+parser = argparse.ArgumentParser(description="Verify a batch of Arabic Hadith records.")
+parser.add_argument("--total", type=int, default=1500, help="Total records across all six collections (1-1500).")
+args = parser.parse_args()
+if not 1 <= args.total <= 1500:
+    raise SystemExit("--total must be between 1 and 1500")
+quotas = {book: args.total // len(BOOKS) + (1 if i < args.total % len(BOOKS) else 0) for i, book in enumerate(BOOKS)}
 BASES = [
     "https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions",
     "https://raw.githubusercontent.com/fawazahmed0/hadith-api/1/editions",
@@ -48,8 +54,9 @@ report = {}
 for book in BOOKS:
     texts, records = [], []
     checked = 0
+    target = quotas[book]
     for number in range(1, MAX_NUMBER + 1):
-        if len(texts) >= TARGET:
+        if len(texts) >= target:
             break
         relative = f"ara-{book}/{number}.json"
         payload = None
@@ -102,10 +109,10 @@ for book in BOOKS:
             "licence_url": LICENSE_URL,
             "arabic_sha256": digest,
         })
-        if len(texts) % 25 == 0:
-            print(f"{book}: {len(texts)}/{TARGET} accepted; checked {checked}", flush=True)
+        if len(texts) % 10 == 0 or len(texts) == target:
+            print(f"{book}: {len(texts)}/{target} accepted; checked {checked}", flush=True)
 
-    if len(texts) != TARGET:
+    if len(texts) != target:
         raise RuntimeError(f"{book}: only {len(texts)} records passed checks; needed {TARGET}")
     library[book] = texts
     report[book] = {"accepted": len(texts), "checked": checked, "records": records}
@@ -113,16 +120,16 @@ for book in BOOKS:
 
 assert len(library) == 6
 assert sum(map(len, library.values())) == 1500
-assert all(len(report[b]["records"]) == TARGET for b in BOOKS)
+assert all(len(report[b]["records"]) == quotas[b] for b in BOOKS)
 
 os.makedirs("build/hadith", exist_ok=True)
-with open("build/hadith/ar-risala-hadith-arabic-1500.json", "w", encoding="utf-8") as output:
+with open("build/hadith/ar-risala-hadith-arabic-{args.total}.json", "w", encoding="utf-8") as output:
     json.dump(library, output, ensure_ascii=False, separators=(",", ":"))
 with open("build/hadith/verification-report.json", "w", encoding="utf-8") as output:
     json.dump({
-        "total": 1500,
+        "total": args.total,
         "per_collection": report,
-        "selection": "first 250 numbered Arabic records per collection present in the upstream dataset",
+        "selection": "first numbered Arabic records per collection present in the upstream dataset; quotas: " + json.dumps(quotas),
         "checks": [
             "upstream repository LICENSE fetched and matched The Unlicense dedication",
             "record JSON parsed successfully",
@@ -135,4 +142,4 @@ with open("build/hadith/verification-report.json", "w", encoding="utf-8") as out
         "translation_included": False,
         "scope_note": "Technical source, repository licence and integrity checks only; not a scholarly authentication or grading review."
     }, output, ensure_ascii=False, indent=2)
-print("SUCCESS: exactly 1,500 Arabic records passed source, licence and integrity checks.")
+print(f"SUCCESS: exactly {args.total} Arabic records passed source, licence and integrity checks.")

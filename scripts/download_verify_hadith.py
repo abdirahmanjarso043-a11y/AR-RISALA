@@ -17,9 +17,13 @@ BOOKS = ["bukhari", "muslim", "abudawud", "tirmidhi", "nasai", "ibnmajah"]
 MAX_NUMBER = 2000
 parser = argparse.ArgumentParser(description="Verify a batch of Arabic Hadith records.")
 parser.add_argument("--total", type=int, default=1500, help="Total records across all six collections (1-1500).")
+parser.add_argument("--skip-per-book", type=int, default=0, help="Number of valid records to skip in each collection before collecting this batch.")
+parser.add_argument("--batch-number", type=int, default=1, help="Batch number used in output filenames.")
 args = parser.parse_args()
 if not 1 <= args.total <= 1500:
     raise SystemExit("--total must be between 1 and 1500")
+if args.skip_per_book < 0 or args.batch_number < 1:
+    raise SystemExit("--skip-per-book must be non-negative and --batch-number must be positive")
 quotas = {book: args.total // len(BOOKS) + (1 if i < args.total % len(BOOKS) else 0) for i, book in enumerate(BOOKS)}
 BASES = [
     "https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions",
@@ -54,6 +58,7 @@ report = {}
 for book in BOOKS:
     texts, records = [], []
     checked = 0
+    accepted_seen = 0
     target = quotas[book]
     for number in range(1, MAX_NUMBER + 1):
         if len(texts) >= target:
@@ -93,6 +98,10 @@ for book in BOOKS:
         if match is None:
             continue
 
+        accepted_seen += 1
+        if accepted_seen <= args.skip_per_book:
+            continue
+
         clean_text = match["text"].strip()
         digest = hashlib.sha256(clean_text.encode("utf-8")).hexdigest()
         source_url = f"https://github.com/fawazahmed0/hadith-api/blob/1/editions/{relative}"
@@ -121,13 +130,15 @@ assert sum(map(len, library.values())) == args.total
 assert all(len(report[b]["records"]) == quotas[b] for b in BOOKS)
 
 os.makedirs("build/hadith", exist_ok=True)
-with open(f"build/hadith/ar-risala-hadith-arabic-{args.total}.json", "w", encoding="utf-8") as output:
+with open(f"build/hadith/ar-risala-hadith-arabic-{args.total}-batch-{args.batch_number}.json", "w", encoding="utf-8") as output:
     json.dump(library, output, ensure_ascii=False, separators=(",", ":"))
 with open("build/hadith/verification-report.json", "w", encoding="utf-8") as output:
     json.dump({
         "total": args.total,
+        "batch_number": args.batch_number,
+        "skipped_valid_records_per_collection": args.skip_per_book,
         "per_collection": report,
-        "selection": "first numbered Arabic records per collection present in the upstream dataset; quotas: " + json.dumps(quotas),
+        "selection": "numbered Arabic records after skipping the requested number of earlier valid records per collection; quotas: " + json.dumps(quotas),
         "checks": [
             "upstream repository LICENSE fetched and matched The Unlicense dedication",
             "record JSON parsed successfully",
@@ -140,4 +151,4 @@ with open("build/hadith/verification-report.json", "w", encoding="utf-8") as out
         "translation_included": False,
         "scope_note": "Technical source, repository licence and integrity checks only; not a scholarly authentication or grading review."
     }, output, ensure_ascii=False, indent=2)
-print(f"SUCCESS: exactly {args.total} Arabic records passed source, licence and integrity checks.")
+print(f"SUCCESS: exactly {args.total} Arabic records passed source, licence and integrity checks in batch {args.batch_number}.")

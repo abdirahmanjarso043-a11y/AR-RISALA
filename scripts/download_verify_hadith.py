@@ -78,9 +78,9 @@ for book in BOOKS:
                 errors.append(f"{url}: {error}")
                 time.sleep(1)
         checked += 1
-        if missing and errors:
-            raise RuntimeError(f"{book}/{number}: both upstream mirrors failed: {'; '.join(errors)}")
         if missing:
+            if errors:
+                print(f"SKIP {book}/{number}: source unavailable on both mirrors; continuing", flush=True)
             continue
 
         hadiths = payload.get("hadiths") if isinstance(payload, dict) else None

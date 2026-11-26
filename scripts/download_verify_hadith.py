@@ -17,13 +17,20 @@ BOOKS = ["bukhari", "muslim", "abudawud", "tirmidhi", "nasai", "ibnmajah"]
 MAX_NUMBER = 2000
 parser = argparse.ArgumentParser(description="Verify a batch of Arabic Hadith records.")
 parser.add_argument("--total", type=int, default=1500, help="Total records across all six collections (1-1500).")
-parser.add_argument("--skip-per-book", type=int, default=0, help="Number of valid records to skip in each collection before collecting this batch.")
+parser.add_argument("--skip-per-book", type=str, default="0", help="One integer or six comma-separated per-collection offsets.")
 parser.add_argument("--batch-number", type=int, default=1, help="Batch number used in output filenames.")
 args = parser.parse_args()
 if not 1 <= args.total <= 1500:
     raise SystemExit("--total must be between 1 and 1500")
-if args.skip_per_book < 0 or args.batch_number < 1:
-    raise SystemExit("--skip-per-book must be non-negative and --batch-number must be positive")
+try:
+    skip_offsets = [int(value) for value in args.skip_per_book.split(",")]
+except ValueError:
+    raise SystemExit("--skip-per-book must be an integer or six comma-separated integers")
+if len(skip_offsets) == 1:
+    skip_offsets *= len(BOOKS)
+if len(skip_offsets) != len(BOOKS) or any(value < 0 for value in skip_offsets) or args.batch_number < 1:
+    raise SystemExit("--skip-per-book must be non-negative (one value or six values) and --batch-number must be positive")
+skip_by_book = dict(zip(BOOKS, skip_offsets))
 quotas = {book: args.total // len(BOOKS) + (1 if i < args.total % len(BOOKS) else 0) for i, book in enumerate(BOOKS)}
 BASES = [
     "https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions",
@@ -99,7 +106,7 @@ for book in BOOKS:
             continue
 
         accepted_seen += 1
-        if accepted_seen <= args.skip_per_book:
+        if accepted_seen <= skip_by_book[book]:
             continue
 
         clean_text = match["text"].strip()
@@ -136,7 +143,7 @@ with open("build/hadith/verification-report.json", "w", encoding="utf-8") as out
     json.dump({
         "total": args.total,
         "batch_number": args.batch_number,
-        "skipped_valid_records_per_collection": args.skip_per_book,
+        "skipped_valid_records_per_collection": skip_by_book,
         "per_collection": report,
         "selection": "numbered Arabic records after skipping the requested number of earlier valid records per collection; quotas: " + json.dumps(quotas),
         "checks": [

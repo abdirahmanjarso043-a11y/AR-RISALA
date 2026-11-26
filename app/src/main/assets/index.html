@@ -402,7 +402,7 @@ async function loadHadith(){
   if(!h||h.status!=='ok'||!h.arabic)throw new Error('This reference is not available in the source.');
   const grade=h.grade&&h.grade.label?h.grade.label:'Not supplied';
   const chapter=h.chapter&&h.chapter.title?h.chapter.title:'Chapter not supplied';
-  box.innerHTML='<h3>'+h.reference+'</h3><p class="muted">'+chapter+'</p><div class="arabic">'+h.arabic+'</div><p><strong>Grade:</strong> '+grade+(h.grade&&h.grade.grader?' — '+h.grade.grader:'')+'</p><p class="muted">Source edition: '+(h.source&&h.source.edition?h.source.edition:'not supplied')+'</p><p><a href="'+h.canonical+'" target="_blank" rel="noopener">Open source record</a></p>';
+  box.innerHTML='<h3>'+escHadith(h.reference)+'</h3><p class="muted">'+escHadith(chapter)+'</p><div class="arabic">'+escHadith(h.arabic)+'</div><p><strong>Grade:</strong> '+escHadith(grade)+(h.grade&&h.grade.grader?' — '+escHadith(h.grade.grader):'')+'</p><p class="muted">Source edition: '+escHadith(h.source&&h.source.edition?h.source.edition:'not supplied')+'</p><p><a href="'+escHadith(h.canonical)+'" target="_blank" rel="noopener">Open source record</a></p>';
   try{localStorage.setItem('ar_risala_'+offlineKey,JSON.stringify(box.innerHTML));}catch(e){}
   const saveButton=document.createElement('button');saveButton.className='back';saveButton.textContent='☆ Save Hadith';saveButton.onclick=()=>bookmarkItem({id:'hadith_'+book+'_'+number,title:h.reference||('Hadith '+number),body:h.arabic,source:'Hadith collection: '+book+' • Grade: '+grade});box.appendChild(saveButton);
  }catch(e){box.innerHTML='<p>That number could not be loaded. Check the number or choose another collection.</p><button class="back" onclick="loadHadith()">Try again</button>';}

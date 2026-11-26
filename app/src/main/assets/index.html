@@ -302,8 +302,8 @@ async function fetchHadithRecord(book,number){
   if(response.ok){
    const h=await response.json();
    const licenceName=String(h?.licence?.arabic_text?.name||'').trim();
-   const isUnlicense=/^(?:the\\s+)?unlicense(?:\\s*\\(public-domain dedication\\))?$/i.test(licenceName);
-   if(h?.status==='ok'&&typeof h.arabic==='string'&&h.arabic.trim()&&h.reference&&/^https:\\/\\//i.test(String(h.canonical||''))&&isUnlicense)return h;
+   const isUnlicense=['unlicense','the unlicense (public-domain dedication)'].includes(licenceName.toLowerCase());
+   if(h?.status==='ok'&&typeof h.arabic==='string'&&h.arabic.trim()&&h.reference&&String(h.canonical||'').startsWith('https://')&&isUnlicense)return h;
   }
  }catch(e){/* use the independently licensed repository mirror below */}
  const path='ara-'+book+'/'+number+'.json';

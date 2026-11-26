@@ -51,14 +51,14 @@ jobs:
           python-version: "3.12"
       - name: Validate bundled app content
         run: python scripts/validate_content.py
-      - name: Download and verify 1,500 licensed Arabic texts
-        run: python scripts/download_verify_hadith.py
+      - name: Download and verify the next 50-Hadith batch
+        run: python scripts/download_verify_hadith.py --total 50
       - name: Upload verified Arabic-only library and report
         uses: actions/upload-artifact@v4
         with:
-          name: AR-RISALA-verified-hadith-arabic-1500
+          name: AR-RISALA-verified-hadith-arabic-batch-50
           path: |
-            build/hadith/ar-risala-hadith-arabic-1500.json
+            build/hadith/ar-risala-hadith-arabic-50.json
             build/hadith/verification-report.json
           if-no-files-found: error
           retention-days: 90

@@ -315,11 +315,23 @@ async function buildHadithLibrary(){
     const number=p[book.id].next;
     if(number>12000)throw new Error('Safety stop: source did not provide enough permitted records for '+book.name+'. Saved progress is safe.');
     let response;
-    try{response=await fetch('https://sahih-al-bukhari.com/api/v1/hadith/'+book.id+'/'+number);}
-    catch(e){throw new Error('Connection interrupted. Saved records are safe; resume when online.');}
-    if(response.status===429){const raw=response.headers.get('Retry-After');const retry=Math.max(10,Math.min(300,Number(raw)||60));if(status)status.textContent='Source rate limit reached. Waiting '+retry+' seconds; saved progress is safe.';await waitHadith(retry*1000);continue;}
+    let transientRetries=0;
+    while(true){
+     try{response=await fetch('https://sahih-al-bukhari.com/api/v1/hadith/'+book.id+'/'+number);}
+     catch(e){throw new Error('Connection interrupted. Saved records are safe; resume when online.');}
+     if(response.status===429||response.status>=500){
+      transientRetries++;
+      if(transientRetries>8)throw new Error('Source remained unavailable after 8 retries for '+book.name+' record '+number+'. Saved progress is safe; resume later.');
+      const raw=Number(response.headers.get('Retry-After'));
+      const retry=Number.isFinite(raw)&&raw>0?Math.max(2,Math.min(300,raw)):Math.min(60,5*Math.pow(2,transientRetries-1));
+      if(status)status.textContent='Source temporarily unavailable (HTTP '+response.status+'). Retry '+transientRetries+'/8 in '+retry+' seconds; saved progress is safe.';
+      await waitHadith(retry*1000);
+      continue;
+     }
+     break;
+    }
     if(response.status===404){p[book.id].next=number+1;saveHadithProgress(p);await updateHadithProgress();await waitHadith(1050);continue;}
-    if(!response.ok){if(response.status>=500){await waitHadith(5000);continue;}throw new Error('Source returned HTTP '+response.status+'. Saved progress is safe.');}
+    if(!response.ok)throw new Error('Source returned HTTP '+response.status+'. Saved progress is safe.');
     let h;try{h=await response.json();}catch(e){throw new Error('The source returned unreadable data. Saved progress is safe.');}
     const licenceName=String(h?.licence?.arabic_text?.name||'').trim();
     const isUnlicense=/^(?:the\s+)?unlicense(?:\s*\(public-domain dedication\))?$/i.test(licenceName);

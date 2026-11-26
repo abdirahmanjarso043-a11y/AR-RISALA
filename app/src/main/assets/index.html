@@ -372,7 +372,7 @@ async function buildHadithLibrary(){
     await dbPutHadith(record);
     p[book.id].count++;p[book.id].next=number+1;saveHadithProgress(p);await updateHadithProgress();
     if(status)status.textContent='Saved '+record.reference+' • '+(record.grade?.label||'Grade not supplied')+' • '+p[book.id].count+'/250 for '+book.name;
-    await waitHadith(1050);
+    await waitHadith(h?.source?.name==='fawazahmed0/hadith-api'?100:1050);
    }
   }
   const finalCounts=await Promise.all(HADITH_COLLECTIONS.map(async b=>(await dbGetHadith(b.id)).filter(r=>r&&r.arabic&&r.reference&&r.licence==='Unlicense').length));

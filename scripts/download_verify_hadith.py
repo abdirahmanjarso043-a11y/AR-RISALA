@@ -12,6 +12,7 @@ DELAY = 1.05
 MAX_NUMBER = 12000
 out = {}
 report = {}
+transient_retries = {}
 for book in BOOKS:
     texts, number, checked = [], 1, 0
     while len(texts) < TARGET and number <= MAX_NUMBER:
@@ -38,6 +39,7 @@ for book in BOOKS:
                 time.sleep(wait)
                 continue
             raise
+        transient_retries.pop((book, number), None)
         checked += 1
         licence = str((payload.get("licence") or {}).get("arabic_text", {}).get("name", "")).strip()
         licence_key = licence.casefold()

@@ -336,6 +336,21 @@ async function fetchHadithRecord(book,number){
   licence:{arabic_text:{name:'The Unlicense'}}
  };
 }
+async function fetchAuditedHadithRecord(book,sourceFileNumber){
+ const path='ara-'+book+'/'+sourceFileNumber+'.json';
+ const mirrors=[
+  'https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/',
+  'https://raw.githubusercontent.com/fawazahmed0/hadith-api/1/editions/'
+ ];
+ let payload=null;
+ for(const base of mirrors){
+  try{const response=await fetch(base+path);if(!response.ok)continue;payload=await response.json();if(payload&&Array.isArray(payload.hadiths))break;payload=null;}
+  catch(e){/* try the second official mirror */}
+ }
+ const item=payload?.hadiths?.find(x=>typeof x.text==='string'&&x.text.trim());
+ if(!item)return null;
+ return {status:'ok',book,number:item.hadithnumber??sourceFileNumber,reference:(HADITH_COLLECTIONS.find(x=>x.id===book)?.name||book)+' '+(item.hadithnumber??sourceFileNumber),arabic:item.text,grade:null,all_graders:[],chapter:{title:''},canonical:'https://github.com/fawazahmed0/hadith-api/blob/1/editions/'+path,source:{name:'fawazahmed0/hadith-api',edition:'ara-'+book},licence:{arabic_text:{name:'The Unlicense'}}};
+}
 async function buildHadithLibrary(){
  const btn=document.getElementById('build-hadith');if(btn)btn.disabled=true;
  const status=document.getElementById('build-status');if(status)status.textContent='Checking saved records and preparing resume…';
@@ -356,7 +371,7 @@ async function buildHadithLibrary(){
     const number=p[book.id].next;
     if(number>12000)throw new Error('Safety stop: source did not provide enough permitted records for '+book.name+'. Saved progress is safe.');
     let h;
-    try{h=await fetchHadithRecord(book.id,number);}
+    try{h=await fetchAuditedHadithRecord(book.id,number);}
     catch(e){throw new Error('Hadith source is temporarily unavailable. Saved records are safe; resume when online.');}
     if(!h){p[book.id].next=number+1;saveHadithProgress(p);await updateHadithProgress();continue;}
     const licenceName=String(h?.licence?.arabic_text?.name||'').trim();

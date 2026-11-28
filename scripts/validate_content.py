@@ -36,7 +36,7 @@ if any(not name.strip() or not bio.strip() or not source.strip()
 for required in ("function validSurahData", "function parseQuranPayload",
                  "async function downloadAllQuran", "n<=114",
                  "async function buildHadithLibrary",
-                 "p[book.id].count<250", "const HADITH_COLLECTIONS="):
+                 "p[book.id].count<100", "const HADITH_COLLECTIONS="):
     if required not in html:
         raise SystemExit(f"FAIL: required app feature missing: {required}")
 

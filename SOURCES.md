@@ -16,7 +16,7 @@
 - The app displays Arabic, reference, chapter and grade fields when the API supplies them. English translations are not supplied by this API.
 - The API documentation states that Arabic text served by the API is matched to the fawazahmed0 hadith-api dataset and dedicated under The Unlicense; the API's metadata, grading labels, topic index and other database structure have separate terms. Follow the provider's attribution and terms, and link to each canonical record.
 - Some records are intentionally unavailable because of source or licensing restrictions. A valid-looking number does not guarantee a record is served.
-- The current feature is a reference browser across six collections, **not a preselected, reviewed set of 1,500 Hadith**. A curated collection, translations and editorial verification remain to be completed.
+- The current feature is a reference browser across six collections and a resumable on-device builder targeting 600 Arabic records (up to 100 per collection). The builder accepts provider-supplied grade labels of Sahih or Hasan only. This is a mechanical source-grade filter, **not a preselected collection independently reviewed by qualified scholars**. English translations and independent editorial verification remain to be completed.
 
 ## Sahaba biographies
 

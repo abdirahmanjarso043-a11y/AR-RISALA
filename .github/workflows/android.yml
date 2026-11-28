@@ -51,25 +51,25 @@ jobs:
           python-version: "3.12"
       - name: Validate bundled app content
         run: python scripts/validate_content.py
-      - name: Verify remaining Hadith - part 1 (450 records)
-        run: python scripts/download_verify_hadith.py --total 450 --skip-per-book 100 --batch-number 5
+      - name: Audit Arabic Hadith source, licence and integrity - part 1 (300 records)
+        run: python scripts/download_verify_hadith.py --total 300 --skip-per-book 0 --batch-number 1
       - name: Upload verified Arabic library - part 1
         uses: actions/upload-artifact@v4
         with:
-          name: AR-RISALA-verified-hadith-part-1-450
+          name: AR-RISALA-hadith-audit-part-1-300
           path: |
-            build/hadith/ar-risala-hadith-arabic-450-batch-5.json
-            build/hadith/verification-report-batch-5.json
+            build/hadith/ar-risala-hadith-arabic-300-batch-1.json
+            build/hadith/verification-report-batch-1.json
           if-no-files-found: error
           retention-days: 90
-      - name: Verify remaining Hadith - part 2 (450 records)
-        run: python scripts/download_verify_hadith.py --total 450 --skip-per-book 175 --batch-number 6
+      - name: Audit Arabic Hadith source, licence and integrity - part 2 (300 records)
+        run: python scripts/download_verify_hadith.py --total 300 --skip-per-book 50 --batch-number 2
       - name: Upload verified Arabic library - part 2
         uses: actions/upload-artifact@v4
         with:
-          name: AR-RISALA-verified-hadith-part-2-450
+          name: AR-RISALA-hadith-audit-part-2-300
           path: |
-            build/hadith/ar-risala-hadith-arabic-450-batch-6.json
-            build/hadith/verification-report-batch-6.json
+            build/hadith/ar-risala-hadith-arabic-300-batch-2.json
+            build/hadith/verification-report-batch-2.json
           if-no-files-found: error
           retention-days: 90

@@ -364,7 +364,8 @@ async function buildHadithLibrary(){
     const canonical=String(h?.canonical||'');
     const gradeLabel=String(h?.grade?.label||'').trim().toLowerCase();
     const acceptableGrade=gradeLabel==='sahih'||gradeLabel==='hasan'||gradeLabel.startsWith('sahih ')||gradeLabel.startsWith('hasan ');
-    if(!acceptableGrade){p[book.id].next=number+1;saveHadithProgress(p);await updateHadithProgress();await waitHadith(1050);continue;}
+    const notUnderReview=String(h?.status||'').toLowerCase()!=='under_review';
+    if(!acceptableGrade||!notUnderReview){p[book.id].next=number+1;saveHadithProgress(p);await updateHadithProgress();await waitHadith(1050);continue;}
     if(!h?.arabic||typeof h.arabic!=='string'||!h.reference||!/^https:\/\//i.test(canonical)||!isUnlicense){
       p[book.id].next=number+1;saveHadithProgress(p);await waitHadith(1050);continue;
     }
